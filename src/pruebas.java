@@ -43,24 +43,27 @@ public class pruebas {
             System.out.println((i+1)+": "+manos.get(i)[0]+" "+manos.get(i)[1]);
         }
         bote = apuesta_ciegas(ciegaInicial, bote, boteApostado, manos, nombreJugador);
-        if (!apuesta_finalizada(boteApostado)) bote = fase_apuestas(bote, boteApostado, manos, nombreJugador);
+        if (!apuesta_finalizada(boteApostado)) bote = fase_apuestas(bote, boteApostado, manos, nombreJugador, false);
 
 
         //FLOP
         sc.nextLine();
         generar_carta_mesa(mesa, baraja, 3);
         imprimir_pantalla(mesa, "FLOP");
+        fase_apuestas(bote, boteApostado, manos, nombreJugador, true);
 
         //FOURTH STREET
         sc.nextLine();
         generar_carta_mesa(mesa, baraja, 1);
         imprimir_pantalla(mesa, "FOURTH STREET");
+        fase_apuestas(bote, boteApostado, manos, nombreJugador, true);
 
         //FIFTH STREET
         sc.nextLine(); 
         generar_carta_mesa(mesa, baraja, 1);
         imprimir_pantalla(mesa, "FIFTH STREET");
-        
+        fase_apuestas(bote, boteApostado, manos, nombreJugador, true);
+
         System.out.println(comprobar_ganador(manos, mesa, valores, manosPoker, nombreJugador));
     }
     static private int max_apostado (ArrayList<Integer> boteApostado) {
@@ -70,14 +73,14 @@ public class pruebas {
         }
         return max;
     }
-    static private int fase_apuestas (int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos, ArrayList <Integer> nombreJugador) {
+    static private int fase_apuestas (int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos, ArrayList <Integer> nombreJugador, boolean primeraVuelta) {
         String opcion = "";
         int apuesta = 0;
         int maxApostado = max_apostado(boteApostado);
         int i;
         do{
             i = 0;
-            while (i < nombreJugador.size() && maxApostado != boteApostado.get(i)) {
+            while (i < nombreJugador.size() && (maxApostado != boteApostado.get(i) || primeraVuelta)) {
 
                 System.out.print(nombreJugador.get(i)+": Ciega "+maxApostado+"\tc/r/f\t:");
                 opcion = sc.nextLine();
@@ -113,7 +116,7 @@ public class pruebas {
                 }
                 i++;
             }
-                
+            primeraVuelta = false;
         }while(!apuesta_finalizada(boteApostado));
 
         return bote;
