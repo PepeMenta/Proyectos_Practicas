@@ -19,7 +19,7 @@ public class pruebas {
         int bote = 0;
         int ciegaInicial = 5;
         ArrayList <Integer> boteApostado = new ArrayList<>(); 
-        ArrayList <String> nombreJugador = new ArrayList<>(); 
+        ArrayList <Integer> nombreJugador = new ArrayList<>(); 
 
         for (String palo : palos) {
             for (String valor : valores) {
@@ -35,7 +35,7 @@ public class pruebas {
             manos.add(new String [2]);
             generarMano(manos.get(i), baraja);
             boteApostado.add(0);
-            nombreJugador.add(i+1+"");
+            nombreJugador.add(i+1);
         }
         //PREFLOP
         System.out.println("\nPREFLOP");
@@ -61,7 +61,7 @@ public class pruebas {
         generar_carta_mesa(mesa, baraja, 1);
         imprimir_pantalla(mesa, "FIFTH STREET");
         
-        System.out.println(comprobar_ganador(manos, mesa, valores, manosPoker));
+        System.out.println(comprobar_ganador(manos, mesa, valores, manosPoker, nombreJugador));
     }
     static private int max_apostado (ArrayList<Integer> boteApostado) {
         int max = 0;
@@ -70,7 +70,7 @@ public class pruebas {
         }
         return max;
     }
-    static private int fase_apuestas (int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos, ArrayList <String> nombreJugador) {
+    static private int fase_apuestas (int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos, ArrayList <Integer> nombreJugador) {
         String opcion = "";
         int apuesta = 0;
         int maxApostado = max_apostado(boteApostado);
@@ -79,7 +79,7 @@ public class pruebas {
             i = 0;
             while (i < nombreJugador.size() && maxApostado != boteApostado.get(i)) {
 
-                System.out.println(nombreJugador.get(i)+": Ciega "+maxApostado+"\tc/r/f\t:");
+                System.out.print(nombreJugador.get(i)+": Ciega "+maxApostado+"\tc/r/f\t:");
                 opcion = sc.nextLine();
 
                 switch (opcion) {
@@ -118,7 +118,7 @@ public class pruebas {
 
         return bote;
     }
-    static private int apuesta_ciegas (int ciegaInicial, int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos, ArrayList <String> nombreJugador) {
+    static private int apuesta_ciegas (int ciegaInicial, int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos, ArrayList <Integer> nombreJugador) {
         String opcion = "";
         int apuesta = 0;
 
@@ -173,7 +173,7 @@ public class pruebas {
 
         return finalizado;
     }
-    static private String comprobar_ganador (ArrayList <String []> manos, ArrayList <String> mesa, String [] valores, String [] manosPoker) {
+    static private String comprobar_ganador (ArrayList <String []> manos, ArrayList <String> mesa, String [] valores, String [] manosPoker, ArrayList <Integer> nombreJugador) {
         String ganador = "1";
         ArrayList <String> combinaciones = new ArrayList <>();
         ArrayList <Integer> combinaciones_jug = new ArrayList <>();
@@ -182,14 +182,14 @@ public class pruebas {
 
         for (int i = 0; i < manos.size(); i++) {
             combinacion = comprobar_mano(mesa, manos.get(i), valores);
-            System.out.println(i+1+". \t"+manos.get(i)[0]+" "+manos.get(i)[1]+"\t"+combinacion);
+            System.out.println(nombreJugador.get(i)+". \t"+manos.get(i)[0]+" "+manos.get(i)[1]+"\t"+combinacion);
 
             if (i == 0) mejorCombinacion = combinacion.split(" ")[0];
             else if (Arrays.asList(manosPoker).indexOf(mejorCombinacion)<Arrays.asList(manosPoker).indexOf(combinacion.split(" ")[0])) {
                 mejorCombinacion = combinacion.split(" ")[0];
                 combinaciones.clear();
                 combinaciones_jug.clear();
-                ganador = String.valueOf(i+1); //TEMPORAL
+                ganador = String.valueOf(nombreJugador.get(i)); //TEMPORAL
             }
             if (mejorCombinacion.equals(combinacion.split(" ")[0])){
                 combinaciones.add(combinacion);
