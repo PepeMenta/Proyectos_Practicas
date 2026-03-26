@@ -124,44 +124,107 @@ public class pruebas {
     static private int apuesta_ciegas (int ciegaInicial, int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos, ArrayList <Integer> nombreJugador) {
         String opcion = "";
         int apuesta = 0;
+        int maxApostado = ciegaInicial;
+        int i;
+        boolean primeraVuelta = true;
+        do{
+            i = 0;
+            while (i < nombreJugador.size() && (maxApostado != boteApostado.get(i) || primeraVuelta)) {
 
-        for (int i = 0; i < nombreJugador.size(); i++) {
-            System.out.print(nombreJugador.get(i)+": Ciega "+ciegaInicial+"\tc/r/f\t:");
-            opcion = sc.nextLine();
+                if (maxApostado != ciegaInicial)System.out.print(nombreJugador.get(i)+": Apuesta de "+maxApostado+"\tc/r/f\t:");
+                else System.out.print(nombreJugador.get(i)+": Ciega "+ciegaInicial+"\tc/r/f\t:");
 
-            switch (opcion) {
-                case "c":
-                    boteApostado.set(i, ciegaInicial);
-                    bote = bote + boteApostado.get(i);
-                    System.out.println("Call");
+                opcion = sc.nextLine();
 
-                    break;
-                
-                case "r":
-                    System.out.print(": ");
-                    do {
-                        apuesta = sc.nextInt();sc.nextLine();
-                        boteApostado.set(i, ciegaInicial + apuesta);
-                        ciegaInicial = boteApostado.get(i);
+                switch (opcion) {
+                    case "c":
+                        if (maxApostado != ciegaInicial) boteApostado.set(i, maxApostado);
+                        else boteApostado.set(i, maxApostado);
+
                         bote = bote + boteApostado.get(i);
-                        System.out.println("Raise");
-                    }while(false);
+                        System.out.println("Call");
 
-                    break;
+                        break;
                     
-                case "f":
-                    manos.remove(i);
-                    boteApostado.remove(i);
-                    nombreJugador.remove(i);
-                    System.out.println("Fold");
-                    i--;
-                    break;
-            }
-        }
-        System.out.println(bote);
+                    case "r":
+                        System.out.print(": ");
+                        do {
+                            apuesta = sc.nextInt();sc.nextLine();
+                            if (maxApostado != ciegaInicial) boteApostado.set(i, maxApostado + apuesta);
+                            else boteApostado.set(i, ciegaInicial + apuesta);
+                            maxApostado = boteApostado.get(i);
+                            bote = bote + (maxApostado-boteApostado.get(i));
+                            System.out.println("Raise");
+                        }while(false);
 
+                        break;
+                        
+                    case "f":
+                        manos.remove(i);
+                        boteApostado.remove(i);
+                        nombreJugador.remove(i);
+                        System.out.println("Fold");
+                        i--;
+                        break;
+                }                
+                i++;
+            }
+            primeraVuelta = false;
+        }while(!apuesta_finalizada(boteApostado));
+
+        System.out.println(bote);
         return bote;
+
     }
+    // static private int apuesta_ciegas (int ciegaInicial, int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos, ArrayList <Integer> nombreJugador) {
+    //     String opcion = "";
+    //     int apuesta = 0;
+    //     boolean primeraVuelta = true;
+    //     int i;
+    //     int maxApostado = 5;
+
+    //     do {
+    //         i = 0;
+    //         while (i < nombreJugador.size() && (maxApostado != boteApostado.get(i) || primeraVuelta)) {
+    //             System.out.print(nombreJugador.get(i)+": Ciega "+ciegaInicial+"\tc/r/f\t:");
+    //             opcion = sc.nextLine();
+
+    //             switch (opcion) {
+    //                 case "c":
+    //                     boteApostado.set(i, ciegaInicial);
+    //                     bote = bote + boteApostado.get(i);
+    //                     System.out.println("Call");
+
+    //                     break;
+                    
+    //                 case "r":
+    //                     System.out.print(": ");
+    //                     do {
+    //                         apuesta = sc.nextInt();sc.nextLine();
+    //                         boteApostado.set(i, ciegaInicial + apuesta);
+    //                         ciegaInicial = boteApostado.get(i);
+    //                         bote = bote + boteApostado.get(i);
+    //                         System.out.println("Raise");
+    //                     }while(false);
+
+    //                     break;
+                        
+    //                 case "f":
+    //                     manos.remove(i);
+    //                     boteApostado.remove(i);
+    //                     nombreJugador.remove(i);
+    //                     System.out.println("Fold");
+    //                     i--;
+    //                     break;
+    //             }
+    //             i++;
+    //         }
+    //         System.out.println(bote);
+    //         primeraVuelta=false;
+    //     }while(!apuesta_finalizada(boteApostado));
+
+    //     return bote;
+    // }
     static boolean apuesta_finalizada (ArrayList<Integer> boteApostado) {
         boolean finalizado = true;
         int i = 1;
