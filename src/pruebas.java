@@ -12,50 +12,164 @@ public class pruebas {
 
         String[] palos = {"\u2660", "\u2665", "\u2666", "\u2663"}; // ♠ ♥ ♦ ♣
         String[] valores = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
-        String[] manosPoker = {"Carta","Par","Doble","Trio","Escalera","Color","Full","Poker","Escalera_de_color","Escalera_real"}; //,"Escalera de color","Escalera real"
+        String[] manosPoker = {"Carta","Par","Doble","Trio","Escalera","Color","Full","Poker"}; //,"Escalera de color","Escalera real"
         ArrayList <String> mesa = new ArrayList<>();
         ArrayList <String []> manos = new ArrayList<>();
         int numJugadores;
+        int bote = 0;
+        int ciegaInicial = 5;
+        ArrayList <Integer> boteApostado = new ArrayList<>(); 
 
-        int x=0;
-        while (true) {
-            for (String palo : palos) {
-                for (String valor : valores) {
-                    baraja.add(valor + palo);
+        for (String palo : palos) {
+            for (String valor : valores) {
+                baraja.add(valor + palo);
+            }
+        }
+
+        System.out.println("NUMERO DE JUGADORES?: ");
+        numJugadores = 4;
+
+
+        for (int i = 0; i < numJugadores; i++) {
+            manos.add(new String [2]);
+            generarMano(manos.get(i), baraja);
+            boteApostado.add(0);
+        }
+        //PREFLOP
+        System.out.println("\nPREFLOP");
+        for (int i = 0; i < manos.size(); i++) {
+            System.out.println((i+1)+": "+manos.get(i)[0]+" "+manos.get(i)[1]);
+        }
+        bote = apuesta_ciegas(numJugadores, ciegaInicial, bote, boteApostado, manos);
+        if (!apuesta_no_finalizada(boteApostado)) bote = fase_apuestas(numJugadores, bote, boteApostado, manos);
+
+
+        //FLOP
+        sc.nextLine();
+        generar_carta_mesa(mesa, baraja, 3);
+        imprimir_pantalla(mesa, "FLOP");
+
+        //FOURTH STREET
+        sc.nextLine();
+        generar_carta_mesa(mesa, baraja, 1);
+        imprimir_pantalla(mesa, "FOURTH STREET");
+
+        //FIFTH STREET
+        sc.nextLine(); 
+        generar_carta_mesa(mesa, baraja, 1);
+        imprimir_pantalla(mesa, "FIFTH STREET");
+        
+        System.out.println(comprobar_ganador(manos, mesa, valores, manosPoker));
+    }
+    static private int max_apostado (ArrayList<Integer> boteApostado) {
+        int max = 0;
+        for (int i = 0; i < boteApostado.size(); i++) {
+            if (max < boteApostado.get(i)) max = boteApostado.get(i);
+        }
+
+        
+        return max;
+    }
+    static private int fase_apuestas (int numJugadores, int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos) {
+        String opcion = "";
+        int apuesta = 0;
+        int maxApostado = max_apostado(boteApostado);
+        int i;
+        do{
+            i = 0;
+
+            while (i < numJugadores && maxApostado != boteApostado.get(i)) {
+                System.out.println("www");
+                System.out.println(i+1+": Ciega "+maxApostado+"\tc/r/f\t:");
+                opcion = sc.nextLine();
+
+                switch (opcion) {
+                    case "c":
+                        boteApostado.set(i, maxApostado);
+                        bote = bote + boteApostado.get(i);
+                        System.out.println("Call \t"+bote);
+
+                        break;
+                        
+                    case "r":
+                        System.out.print(": ");
+                        do {
+                            apuesta = sc.nextInt();sc.nextLine();
+                            boteApostado.set(i, boteApostado.get(i) + apuesta);
+                            maxApostado = boteApostado.get(i);
+                            bote = bote + boteApostado.get(i);
+                            System.out.println("Raise \t"+bote);
+                        }while(false);
+                            
+                        break;
+
+                    case "f":
+                        numJugadores--;
+                        manos.remove(i);
+                        boteApostado.remove(1);
+                        System.out.println("Fold");
+                        break;
+
                 }
             }
+                i++;
+        }while(apuesta_no_finalizada(boteApostado));
 
-            System.out.println("NUMERO DE JUGADORES?: ");
-            numJugadores = 4;
+        return bote;
+    }
+    static private int apuesta_ciegas (int numJugadores, int ciegaInicial, int bote, ArrayList<Integer> boteApostado, ArrayList <String []> manos) {
+        String opcion = "";
+        int apuesta = 0;
 
-            for (int i = 0; i < numJugadores; i++) {
-                manos.add(new String [2]);
-                generarMano(manos.get(i), baraja);
+        for (int i = 0; i < numJugadores; i++) {
+            System.out.print(i+1+": Ciega "+ciegaInicial+"\tc/r/f\t:");
+            opcion = sc.nextLine();
+
+            switch (opcion) {
+                case "c":
+                    boteApostado.set(i, ciegaInicial);
+                    bote = bote + boteApostado.get(i);
+                    System.out.println("Call \t"+bote);
+
+                    break;
+                
+                case "r":
+                    System.out.print(": ");
+                    do {
+                        apuesta = sc.nextInt();sc.nextLine();
+                        boteApostado.set(i, boteApostado.get(i) + apuesta);
+                        ciegaInicial = boteApostado.get(i);
+                        bote = bote + boteApostado.get(i);
+                        System.out.println("Raise \t"+bote);
+                    }while(false);
+                    
+                    break;
+
+                case "f":
+                    numJugadores--;
+                    manos.remove(i);
+                    boteApostado.remove(1);
+                    System.out.println("Fold");
+                    break;
             }
-            System.out.println("\nPREFLOP");
-            for (int i = 0; i < manos.size(); i++) {
-                System.out.println((i+1)+": "+manos.get(i)[0]+" "+manos.get(i)[1]);
-            }
-            generar_carta_mesa(mesa, baraja, 3);
-            imprimir_pantalla(mesa, "FLOP");
-
-            //FOURTH STREET
-            // sc.nextLine();
-            generar_carta_mesa(mesa, baraja, 1);
-            imprimir_pantalla(mesa, "FOURTH STREET");
-
-            //FIFTH STREET
-            // sc.nextLine(); 
-            generar_carta_mesa(mesa, baraja, 1);
-            imprimir_pantalla(mesa, "FIFTH STREET");
-            
-            System.out.println(x);
-            System.out.println(comprobar_ganador(manos, mesa, valores, manosPoker));
-            mesa.clear();
-            baraja.clear();
-            manos.clear();
-            x++;
         }
+
+        return bote;
+    }
+    static boolean apuesta_no_finalizada (ArrayList<Integer> boteApostado) {
+        boolean noFinalizado = true;
+        int i = 1;
+
+        if (boteApostado.size() > 1) {
+            while (noFinalizado && i < boteApostado.size()){
+                if (!boteApostado.get(0).equals(boteApostado.get(i))){
+                    noFinalizado = false;
+                }
+                else i++;
+            }        
+        } 
+
+        return noFinalizado;
     }
     static private String comprobar_ganador (ArrayList <String []> manos, ArrayList <String> mesa, String [] valores, String [] manosPoker) {
         String ganador = "1";
@@ -80,7 +194,7 @@ public class pruebas {
                 combinaciones_jug.add(i+1);
             }
         }
-
+    
         if (combinaciones.size()>1){ //SI HAY MAS DE UNO CON LA MISMA COMBINACION DE CARTAS
             ArrayList <String []> manosGanadoras = new ArrayList<>();
             for (int i = 0; i < combinaciones_jug.size(); i++) {
@@ -568,10 +682,6 @@ public class pruebas {
         resultado = comprobar_carta_alta(resultado, valores, mano);
         resultado = comprobar_escalera_color(mesa, mano, valores, resultado);
         resultado = comprobar_escalera_real(mesa, mano, valores, resultado);
-        if (resultado.split(" ")[0].equals("Escalera_real")){
-            System.out.println(resultado);
-            System.exit(0);
-        }
         return resultado;
     }
     static private String comprobar_escalera_real (ArrayList <String> mesa, String [] mano, String [] valores, String resultado) {
