@@ -20,49 +20,57 @@ public class pruebas {
         ArrayList <Integer> botesJugadores = new ArrayList<>();
         int posDealer;
         int numJugadores;
-        int bote = 0;
+        int bote;
         int ciegaInicial = 10;
         int boteInicial = 500;
 
-        for (String palo : palos) {
-            for (String valor : valores) {
-                baraja.add(valor + palo);
-            }
-        }
-
         System.out.println("NUMERO DE JUGADORES?: ");
         numJugadores = 4;
-
-        iniciar_arrays(manos, baraja, numJugadores, boteApostado, nombreJugador, botesJugadores, boteInicial);
+        // posDealer = random.nextInt(numJugadores);
         posDealer = 1;
 
-        //PREFLOP
-        System.out.println("\nPREFLOP");
-        for (int i = 0; i < manos.size(); i++) {
-            if (i != posDealer) System.out.println((i+1)+": "+manos.get(i)[0]+" "+manos.get(i)[1]);
-            else System.out.println((i+1)+": "+manos.get(i)[0]+" "+manos.get(i)[1]+" \t✪");
+        while (true) {
+            iniciar_arrays(manos, palos, valores, baraja, numJugadores, boteApostado, nombreJugador, botesJugadores, boteInicial);
+            bote = 0;
+
+            //PREFLOP
+            System.out.println("\nPREFLOP");
+            for (int i = 0; i < manos.size(); i++) {
+                if (i != posDealer) System.out.println((i+1)+": "+manos.get(i)[0]+" "+manos.get(i)[1]);
+                else System.out.println((i+1)+": "+manos.get(i)[0]+" "+manos.get(i)[1]+" \t✪");
+            }
+            System.out.println("\nCiegas "+ciegaInicial/2+"/"+ciegaInicial);
+            bote = fase_apuestas(ciegaInicial, bote, posDealer, boteApostado, manos, nombreJugador);
+
+            //FLOP
+            sc.nextLine();
+            generar_carta_mesa(mesa, baraja, 3);
+            imprimir_pantalla(mesa, "FLOP");
+            bote = fase_apuestas(0, bote, posDealer, boteApostado, manos, nombreJugador);
+
+            //FOURTH STREET
+            sc.nextLine();
+            generar_carta_mesa(mesa, baraja, 1);
+            imprimir_pantalla(mesa, "FOURTH STREET");
+            bote = fase_apuestas(0, bote, posDealer, boteApostado, manos, nombreJugador);
+
+            //FIFTH STREET
+            sc.nextLine(); 
+            generar_carta_mesa(mesa, baraja, 1);
+            imprimir_pantalla(mesa, "FIFTH STREET");
+            bote = fase_apuestas(0, bote, posDealer, boteApostado, manos, nombreJugador);
+
+            System.out.println(comprobar_ganador(manos, mesa, valores, manosPoker, nombreJugador));
+
+            // if (posDealer < numJugadores-1) posDealer++;
+            // else posDealer = 0;
+            baraja.clear();
+            manos.clear();
+            mesa.clear();
+            boteApostado.clear();
+            nombreJugador.clear();
+            botesJugadores.clear();
         }
-        bote = fase_apuestas(ciegaInicial, bote, posDealer, boteApostado, manos, nombreJugador);
-
-        //FLOP
-        sc.nextLine();
-        generar_carta_mesa(mesa, baraja, 3);
-        imprimir_pantalla(mesa, "FLOP");
-        bote = fase_apuestas(-1, bote, posDealer, boteApostado, manos, nombreJugador);
-
-        //FOURTH STREET
-        sc.nextLine();
-        generar_carta_mesa(mesa, baraja, 1);
-        imprimir_pantalla(mesa, "FOURTH STREET");
-        bote = fase_apuestas(-1, bote, posDealer, boteApostado, manos, nombreJugador);
-
-        //FIFTH STREET
-        sc.nextLine(); 
-        generar_carta_mesa(mesa, baraja, 1);
-        imprimir_pantalla(mesa, "FIFTH STREET");
-        bote = fase_apuestas(-1 ,bote, posDealer, boteApostado, manos, nombreJugador);
-
-        System.out.println(comprobar_ganador(manos, mesa, valores, manosPoker, nombreJugador));
     }
     static private int max_apostado (ArrayList<Integer> boteApostado) {
         int max = 0;
@@ -75,39 +83,48 @@ public class pruebas {
         String opcion = "";
         int apuesta = 0;
         int maxApostado;
-        if (ciegaInicial == -1) maxApostado = max_apostado(boteApostado);
+        if (ciegaInicial == 0) maxApostado = max_apostado(boteApostado);
         else maxApostado = ciegaInicial;
         int i;
         int contadorVuelta;
         boolean primeraVuelta = true;
+        int apostadoFase = 0;
         do{
-            i = posDealer + 1;
+            if (posDealer < boteApostado.size()-1) i = posDealer + 1;
+            else i = 0;
             contadorVuelta = 0;
             while(contadorVuelta < boteApostado.size() && (maxApostado != boteApostado.get(i) || primeraVuelta)) {
-                if (ciegaInicial == 5) System.out.print(nombreJugador.get(i)+": Ciega "+ciegaInicial+"\tc/r/f\t:");
-                else if (!apuesta_finalizada(boteApostado))System.out.print(nombreJugador.get(i)+": Apuesta de "+maxApostado+"\tc/r/f\t:");
+                if (ciegaInicial != 0) {
+                    if (i == posDealer + 1) System.out.print(nombreJugador.get(i)+": \tSB\tc/r/f\t:");
+                    else if (i == posDealer + 2) System.out.print(nombreJugador.get(i)+": \tGB\tc/r\t:");
+                    else System.out.print(nombreJugador.get(i)+": \t\tc/r/f\t:");
+                }
+                else if (!apuesta_finalizada(boteApostado))System.out.print(nombreJugador.get(i)+": Apuesta de "+(apostadoFase)+"\tc/r/f\t:");
                 else System.out.print(nombreJugador.get(i)+": \tc/r/f\t:");
                 opcion = sc.nextLine();
+                // opcion = "c";
 
                 switch (opcion) {
                     case "c":
-                        if (!apuesta_finalizada(boteApostado) || ciegaInicial != -1){
-                            bote = bote + (maxApostado - boteApostado.get(i));   
+                        if (!apuesta_finalizada(boteApostado) || ciegaInicial != 0){
+                            System.out.println("Call "+(maxApostado - boteApostado.get(i)));
+                            bote = bote + (maxApostado - boteApostado.get(i)); 
                             boteApostado.set(i, maxApostado);
                         } 
-                        System.out.println("Call");
+                        else System.out.println("Call");
                         break;
                     
                     case "r":
                         System.out.print(": ");
                         do {
                             apuesta = sc.nextInt();sc.nextLine();
+                            apostadoFase = apostadoFase + apuesta + ciegaInicial;
                             bote = bote + (maxApostado + apuesta) - boteApostado.get(i);
                             boteApostado.set(i, maxApostado + apuesta);
                             maxApostado = boteApostado.get(i);
                             System.out.println("Raise");
                         }while(false);
-                        ciegaInicial = -1;
+                        ciegaInicial = 0;
                         break;
                         
                     case "f":
@@ -118,6 +135,7 @@ public class pruebas {
                         i--;
                         posDealer--;
                         break;
+                        
                 }        
                 // System.out.print("\n"+bote + "\t");
                 // for (int j = 0; j < boteApostado.size(); j++) {
@@ -793,7 +811,13 @@ public class pruebas {
         }
         return -1;
     }
-    static void iniciar_arrays (ArrayList <String []> manos, ArrayList<String> baraja, int numJugadores, ArrayList <Integer> boteApostado, ArrayList <Integer> nombreJugador, ArrayList <Integer> botesJugadores, int boteInicial) {
+    static void iniciar_arrays (ArrayList <String []> manos, String [] palos, String [] valores, ArrayList<String> baraja, int numJugadores, ArrayList <Integer> boteApostado, ArrayList <Integer> nombreJugador, ArrayList <Integer> botesJugadores, int boteInicial) {
+        for (String palo : palos) {
+            for (String valor : valores) {
+                baraja.add(valor + palo);
+            }
+        }
+        
         for (int i = 0; i < numJugadores; i++) {
             manos.add(new String [2]);
             generarMano(manos.get(i), baraja);
