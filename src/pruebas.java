@@ -26,12 +26,15 @@ public class pruebas {
 
         System.out.println("NUMERO DE JUGADORES?: ");
         numJugadores = 4;
-        // posDealer = random.nextInt(numJugadores);
-        posDealer = 1;
+        posDealer = random.nextInt(numJugadores);
+        // posDealer = 3;
 
         while (true) {
             iniciar_arrays(manos, palos, valores, baraja, numJugadores, boteApostado, nombreJugador, botesJugadores, boteInicial);
-            bote = 0;
+            boteApostado.set((posDealer + 1)%botesJugadores.size(), ciegaInicial/2);
+            boteApostado.set((posDealer + 2)%botesJugadores.size(), ciegaInicial);
+
+            bote = ciegaInicial/2 + ciegaInicial;
 
             //PREFLOP
             System.out.println("\nPREFLOP");
@@ -62,8 +65,8 @@ public class pruebas {
 
             System.out.println(comprobar_ganador(manos, mesa, valores, manosPoker, nombreJugador));
 
-            // if (posDealer < numJugadores-1) posDealer++;
-            // else posDealer = 0;
+            if (posDealer < numJugadores-1) posDealer++;
+            else posDealer = 0;
             baraja.clear();
             manos.clear();
             mesa.clear();
@@ -89,20 +92,20 @@ public class pruebas {
         int contadorVuelta;
         boolean primeraVuelta = true;
         int apostadoFase = 0;
+
         do{
-            if (posDealer < boteApostado.size()-1) i = posDealer + 1;
-            else i = 0;
+            i = (posDealer + 1) % boteApostado.size();
             contadorVuelta = 0;
             while(contadorVuelta < boteApostado.size() && (maxApostado != boteApostado.get(i) || primeraVuelta)) {
                 if (ciegaInicial != 0) {
-                    if (i == posDealer + 1) System.out.print(nombreJugador.get(i)+": \tSB\tc/r/f\t:");
-                    else if (i == posDealer + 2) System.out.print(nombreJugador.get(i)+": \tGB\tc/r\t:");
+                    if (i == (posDealer + 1) % boteApostado.size()) System.out.print(nombreJugador.get(i)+": \tSB\tc/r/f\t:");
+                    else if (i == (posDealer + 2) % boteApostado.size()) System.out.print(nombreJugador.get(i)+": \tGB\tc/r\t:");
                     else System.out.print(nombreJugador.get(i)+": \t\tc/r/f\t:");
                 }
                 else if (!apuesta_finalizada(boteApostado))System.out.print(nombreJugador.get(i)+": Apuesta de "+(apostadoFase)+"\tc/r/f\t:");
                 else System.out.print(nombreJugador.get(i)+": \tc/r/f\t:");
-                opcion = sc.nextLine();
-                // opcion = "c";
+                // opcion = sc.nextLine();
+                opcion = "c";
 
                 switch (opcion) {
                     case "c":
@@ -135,7 +138,7 @@ public class pruebas {
                         i--;
                         posDealer--;
                         break;
-                        
+
                 }        
                 // System.out.print("\n"+bote + "\t");
                 // for (int j = 0; j < boteApostado.size(); j++) {
