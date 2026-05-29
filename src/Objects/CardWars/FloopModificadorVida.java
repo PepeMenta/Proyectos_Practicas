@@ -1,0 +1,20 @@
+package Objects.CardWars;
+
+import java.util.List;
+
+public class FloopModificadorVida implements Efecto {
+
+    public ProveedorValor modificacion;
+    public ObjetivoFloop objetivo;
+
+    @Override
+    public void ejecutar(ContextoPartida contexto, Jugador jugador, Carta carta) {
+        List<Criatura> objetivos = objetivo.getObjetivos(contexto, jugador, carta);
+        int valor = modificacion.getValue(contexto, jugador, carta);
+        for (int i = 0; i < objetivos.size(); i++) {
+            objetivos.get(i).vidaMax += valor;
+            objetivos.get(i).vida += valor;
+        }
+    }
+
+}

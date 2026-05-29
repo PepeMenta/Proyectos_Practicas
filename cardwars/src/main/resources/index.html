@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Card Wars</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background: #eef1f4;
+      color: #111827;
+      display: flex;
+      flex-direction: column;
+      font-family: Arial, Helvetica, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .top-bar {
+      align-items: center;
+      background: #111827;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      padding: 16px 24px;
+    }
+
+    .top-center {
+      align-items: center;
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+    }
+
+    .app-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .life-display {
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(17, 24, 39, 0.10);
+      display: flex;
+      gap: 8px;
+      padding: 8px 12px;
+      width: max-content;
+    }
+
+    .life-display.rival-life {
+      justify-self: end;
+    }
+
+    .life-label {
+      color: #4b5563;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .life-value {
+      color: #f87171;
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-weight: 700;
+      padding: 10px 16px;
+    }
+
+    .nav-button {
+      background: #374151;
+    }
+
+    .nav-button.active {
+      background: #2563eb;
+    }
+
+    main {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 24px;
+    }
+
+    .view {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 100%;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 4px;
+    }
+
+    p {
+      color: #4b5563;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .cards-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      overflow: auto;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(17, 24, 39, 0.12);
+      cursor: pointer;
+      padding: 8px;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+      user-select: none;
+    }
+
+    .card:hover {
+      box-shadow: 0 10px 24px rgba(17, 24, 39, 0.18);
+      transform: translateY(-2px);
+    }
+
+    .card.compact {
+      flex: 0 0 104px;
+      padding: 6px;
+    }
+
+    .card.flooped {
+      filter: grayscale(0.85);
+      opacity: 0.62;
+    }
+
+    .card.dragging {
+      opacity: 0.45;
+    }
+
+    .drag-preview {
+      box-shadow: 0 16px 36px rgba(17, 24, 39, 0.28);
+      opacity: 0.92;
+      pointer-events: none;
+      position: fixed;
+      transform: translate(-50%, -50%);
+      width: 104px;
+      z-index: 40;
+    }
+
+    .card-image {
+      aspect-ratio: 2 / 3;
+      border-radius: 6px;
+      object-fit: contain;
+      pointer-events: none;
+      width: 100%;
+    }
+
+    .card-terrain {
+      color: #6b7280;
+      font-size: 12px;
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .game-layout {
+      display: grid;
+      gap: 16px;
+      grid-template-rows: auto minmax(0, 3fr) minmax(0, 1fr);
+      height: calc(100vh - 136px);
+      min-height: 640px;
+    }
+
+    .game-status {
+      align-items: center;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .battlefield {
+      background: #d6dde5;
+      border: 1px solid #b8c1cc;
+      border-radius: 8px;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(130px, 1fr));
+      min-height: 0;
+      padding: 14px 48px;
+    }
+
+    .lane {
+      background: #f8fafc;
+      border: 2px solid #9ca3af;
+      border-radius: 8px;
+      display: grid;
+      gap: 12px;
+      grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+      min-height: 0;
+      padding: 10px;
+      position: relative;
+    }
+
+    .lane-title {
+      align-items: center;
+      background: #e5e7eb;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      color: #374151;
+      display: flex;
+      font-size: 12px;
+      font-weight: 700;
+      justify-content: center;
+      justify-self: center;
+      padding: 4px 12px;
+      text-transform: uppercase;
+    }
+
+    .lane-side {
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+      padding: 8px;
+    }
+
+    .rival-side {
+      border: 1px solid rgba(190, 18, 60, 0.24);
+    }
+
+    .player-side {
+      border: 1px solid rgba(37, 99, 235, 0.24);
+    }
+
+    .side-header {
+      align-items: center;
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      min-height: 24px;
+    }
+
+    .side-label {
+      color: #4b5563;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .terrain-pill {
+      border-radius: 999px;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .terrain-neutral {
+      background:
+        linear-gradient(135deg, rgba(148, 163, 184, 0.22), rgba(226, 232, 240, 0.86)),
+        #f8fafc;
+    }
+
+    .terrain-neutral .terrain-pill {
+      background: #64748b;
+    }
+
+    .terrain-maiz {
+      background:
+        linear-gradient(135deg, rgba(234, 179, 8, 0.22), rgba(254, 249, 195, 0.92)),
+        #fefce8;
+    }
+
+    .terrain-maiz .terrain-pill {
+      background: #a16207;
+    }
+
+    .terrain-pantano {
+      background:
+        linear-gradient(135deg, rgba(20, 83, 45, 0.20), rgba(220, 252, 231, 0.88)),
+        #f0fdf4;
+    }
+
+    .terrain-pantano .terrain-pill {
+      background: #166534;
+    }
+
+    .terrain-desierto {
+      background:
+        linear-gradient(135deg, rgba(217, 119, 6, 0.20), rgba(254, 243, 199, 0.92)),
+        #fffbeb;
+    }
+
+    .terrain-desierto .terrain-pill {
+      background: #b45309;
+    }
+
+    .terrain-arcoiris {
+      background:
+        linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(236, 72, 153, 0.14), rgba(34, 197, 94, 0.14)),
+        #ffffff;
+    }
+
+    .terrain-arcoiris .terrain-pill {
+      background: #7c3aed;
+    }
+
+    .terrain-llanura,
+    .terrain-buenas-tierras {
+      background:
+        linear-gradient(135deg, rgba(34, 197, 94, 0.16), rgba(240, 253, 244, 0.94)),
+        #f7fee7;
+    }
+
+    .terrain-llanura .terrain-pill,
+    .terrain-buenas-tierras .terrain-pill {
+      background: #15803d;
+    }
+
+    .slot {
+      align-items: center;
+      border: 1px dashed #94a3b8;
+      border-radius: 8px;
+      color: #64748b;
+      display: flex;
+      flex: 1;
+      font-size: 13px;
+      justify-content: center;
+      min-height: 0;
+      padding: 8px;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .slot.drag-over {
+      background: rgba(37, 99, 235, 0.12);
+      border-color: #2563eb;
+      border-style: solid;
+    }
+
+    .slot .card {
+      width: min(100%, 112px);
+    }
+
+    .floop-actions {
+      align-items: center;
+      display: none;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .player-slot.show-actions .floop-actions {
+      display: flex;
+    }
+
+    .floop-button {
+      background: #7c3aed;
+      border-radius: 999px;
+      font-size: 12px;
+      padding: 7px 14px;
+    }
+
+    .floop-button:disabled {
+      background: #9ca3af;
+      cursor: default;
+    }
+
+    .floop-status {
+      color: #4b5563;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .play-area {
+      align-items: stretch;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 4fr 1fr;
+      min-height: 0;
+    }
+
+    .hand-panel,
+    .deck-panel {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(17, 24, 39, 0.12);
+      min-height: 0;
+      overflow: hidden;
+      padding: 12px;
+    }
+
+    .panel-header {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .panel-title {
+      font-weight: 700;
+    }
+
+    .magic-pill {
+      background: #7c3aed;
+      border-radius: 999px;
+      color: #ffffff;
+      font-size: 14px;
+      padding: 4px 12px;
+    }
+
+    .hand-row {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 2px 2px 10px;
+      max-height: calc(100% - 38px);
+    }
+
+    .deck-stack {
+      align-items: center;
+      background: repeating-linear-gradient(135deg, #1f2937 0 8px, #111827 8px 16px);
+      border: 3px solid #f8fafc;
+      border-radius: 8px;
+      box-shadow:
+        7px 7px 0 #374151,
+        14px 14px 0 #4b5563,
+        0 10px 24px rgba(17, 24, 39, 0.24);
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      font-weight: 700;
+      justify-content: center;
+      margin: 10px auto 0;
+      min-height: 150px;
+      max-width: 130px;
+      padding: 12px;
+      text-align: center;
+      width: calc(100% - 18px);
+    }
+
+    .deck-count {
+      color: #d1d5db;
+      font-size: 12px;
+      font-weight: 400;
+      margin-top: 8px;
+    }
+
+    .modal-overlay {
+      align-items: center;
+      background: rgba(17, 24, 39, 0.72);
+      bottom: 0;
+      display: none;
+      justify-content: center;
+      left: 0;
+      padding: 24px;
+      position: fixed;
+      right: 0;
+      top: 0;
+      z-index: 10;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+      max-height: calc(100vh - 48px);
+      max-width: min(440px, calc(100vw - 48px));
+      overflow: auto;
+      padding: 16px;
+      position: relative;
+      width: 100%;
+    }
+
+    .modal-close {
+      align-items: center;
+      background: #111827;
+      border-radius: 999px;
+      color: #ffffff;
+      display: flex;
+      font-size: 22px;
+      height: 36px;
+      justify-content: center;
+      line-height: 1;
+      padding: 0;
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      width: 36px;
+    }
+
+    .modal-image {
+      aspect-ratio: 2 / 3;
+      display: block;
+      margin: 0 auto;
+      max-height: 70vh;
+      object-fit: contain;
+      width: 100%;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .modal-stats {
+      color: #374151;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+      margin-top: 12px;
+    }
+
+    .empty-state {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(17, 24, 39, 0.12);
+      color: #4b5563;
+      grid-column: 1 / -1;
+      padding: 24px;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .battlefield {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+      }
+
+      .play-area {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .top-bar {
+        justify-content: flex-start;
+      }
+
+      .top-center {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .battlefield {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top-bar">
+    <div class="top-center">
+      <div class="app-title">Card Wars</div>
+      <div class="nav-actions">
+        <button id="cardsButton" class="nav-button active" type="button">Cartas</button>
+        <button id="gameButton" class="nav-button" type="button">Partida</button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section id="cardsView" class="view">
+      <div>
+        <h1>Todas las cartas</h1>
+        <p>Cartas cargadas desde la base de datos.</p>
+      </div>
+      <div id="cardsGrid" class="cards-grid"></div>
+    </section>
+
+    <section id="gameView" class="view hidden">
+      <div class="game-layout">
+        <div class="game-status">
+          <div class="life-display player-life">
+            <span class="life-label">Jugador</span>
+            <span id="playerLife" class="life-value">25</span>
+          </div>
+
+          <div class="life-display rival-life">
+            <span class="life-label">Rival</span>
+            <span id="rivalLife" class="life-value">25</span>
+          </div>
+        </div>
+
+        <div id="battlefield" class="battlefield"></div>
+
+        <div class="play-area">
+          <div class="hand-panel">
+            <div class="panel-header">
+              <div class="panel-title">Mano</div>
+              <div class="magic-pill">Magia: 7</div>
+            </div>
+            <div id="handRow" class="hand-row"></div>
+          </div>
+
+          <div class="deck-panel">
+            <div class="panel-header">
+              <div class="panel-title">Baraja</div>
+            </div>
+            <div id="deckStack" class="deck-stack">
+              Robar carta
+              <div id="deckCount" class="deck-count"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="cardModal" class="modal-overlay">
+    <div class="modal-card">
+      <button id="closeModalButton" class="modal-close" type="button" aria-label="Cerrar">x</button>
+      <img id="modalImage" class="modal-image" src="" alt="">
+    </div>
+  </div>
+
+<script>
+  const cardsButton = document.getElementById("cardsButton");
+  const gameButton = document.getElementById("gameButton");
+  const cardsView = document.getElementById("cardsView");
+  const gameView = document.getElementById("gameView");
+  const cardsGrid = document.getElementById("cardsGrid");
+  const battlefield = document.getElementById("battlefield");
+  const handRow = document.getElementById("handRow");
+  const deckStack = document.getElementById("deckStack");
+  const deckCount = document.getElementById("deckCount");
+  const cardModal = document.getElementById("cardModal");
+  const closeModalButton = document.getElementById("closeModalButton");
+  const modalImage = document.getElementById("modalImage");
+
+  let currentCards = [];
+  let handCards = [];
+  let deckCards = [];
+  let javaDeckCount = null;
+  let laneCards = Array.from({ length: 4 }, () => null);
+  let activeDrag = null;
+  let suppressNextCardClick = false;
+  let laneTerrains = Array.from({ length: 4 }, () => ({
+    rival: "NEUTRAL",
+    player: "NEUTRAL"
+  }));
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function showView(viewName) {
+    const showingGame = viewName === "game";
+    cardsView.classList.toggle("hidden", showingGame);
+    gameView.classList.toggle("hidden", !showingGame);
+    cardsButton.classList.toggle("active", !showingGame);
+    gameButton.classList.toggle("active", showingGame);
+  }
+
+  function cardTemplate(card, index, compact = false) {
+    return `
+      <div class="card ${compact ? "compact" : ""} ${card.flooped ? "flooped" : ""}" data-card-index="${index}">
+        <img src="${escapeHtml(card.imagePath)}" class="card-image" alt="${escapeHtml(card.name)}">
+      </div>
+    `;
+  }
+
+  function renderCollection() {
+    if (currentCards.length === 0) {
+      cardsGrid.innerHTML = `<div class="empty-state">No hay cartas cargadas.</div>`;
+      return;
+    }
+
+    cardsGrid.innerHTML = currentCards
+      .map((card, index) => cardTemplate(card, index))
+      .join("");
+  }
+
+  function renderBattlefield() {
+    battlefield.innerHTML = laneTerrains.map((terrains, index) => `
+      <div class="lane">
+        <div class="lane-side rival-side ${terrainClass(terrains.rival)}">
+          <div class="side-header">
+            <div class="side-label">Rival</div>
+            <div class="terrain-pill">${escapeHtml(terrainLabel(terrains.rival))}</div>
+          </div>
+          <div class="slot">Sin carta</div>
+        </div>
+        <div class="lane-title">Carril ${index + 1}</div>
+        <div class="lane-side player-side ${terrainClass(terrains.player)}">
+          <div class="side-header">
+            <div class="side-label">Tu zona</div>
+            <div class="terrain-pill">${escapeHtml(terrainLabel(terrains.player))}</div>
+          </div>
+          <div class="slot player-slot" data-lane-index="${index}">
+            ${laneCards[index] ? `
+              ${cardTemplate(laneCards[index], currentCards.indexOf(laneCards[index]), true)}
+              <div class="floop-actions">
+                <button class="floop-button" type="button" data-lane-index="${index}" ${laneCards[index].flooped ? "disabled" : ""}>Floop</button>
+                ${laneCards[index].flooped ? `<span class="floop-status">Floopeada</span>` : ""}
+              </div>
+            ` : "Sin carta"}
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function terrainClass(terrain) {
+    return `terrain-${String(terrain ?? "NEUTRAL").toLowerCase().replaceAll("_", "-")}`;
+  }
+
+  function terrainLabel(terrain) {
+    return String(terrain ?? "NEUTRAL").replaceAll("_", " ");
+  }
+
+  function renderHandAndDeck() {
+    handRow.innerHTML = handCards.length === 0
+      ? `<div class="empty-state">No tienes cartas en mano.</div>`
+      : handCards.map(card => cardTemplate(card, currentCards.indexOf(card), true)).join("");
+
+    deckCount.textContent = `${javaDeckCount ?? deckCards.length} cartas`;
+  }
+
+  function setupGameCards() {
+    handCards = [];
+    deckCards = currentCards.slice();
+    javaDeckCount = null;
+    laneCards = Array.from({ length: 4 }, () => null);
+    renderBattlefield();
+    renderHandAndDeck();
+  }
+
+  function registerCard(card) {
+    const existingCard = currentCards.find(currentCard => currentCard.name === card.name);
+    if (existingCard) {
+      return existingCard;
+    }
+
+    currentCards.push(card);
+    return card;
+  }
+
+  function placeCardInLane(cardIndex, laneIndex) {
+    const card = currentCards[cardIndex];
+    if (!card || !Number.isInteger(laneIndex) || laneIndex < 0 || laneIndex >= laneCards.length) {
+      return;
+    }
+
+    if (laneCards[laneIndex]) {
+      return;
+    }
+
+    laneCards[laneIndex] = card;
+    handCards = handCards.filter(handCard => handCard !== card);
+    renderBattlefield();
+    renderHandAndDeck();
+
+    if (window.java && typeof window.java.colocarCartaEnCarril === "function") {
+      window.java.colocarCartaEnCarril(card.name, laneIndex);
+    }
+  }
+
+  window.markLaneCardFlooped = function(laneIndex) {
+    if (!Number.isInteger(laneIndex) || laneIndex < 0 || laneIndex >= laneCards.length || !laneCards[laneIndex]) {
+      return;
+    }
+
+    laneCards[laneIndex].flooped = true;
+    renderBattlefield();
+  };
+
+  window.renderCards = function renderCards(cards) {
+    currentCards = Array.isArray(cards) ? cards : [];
+    renderCollection();
+    setupGameCards();
+  };
+
+  window.addCardToHand = function(card, remainingDeckCount) {
+    handCards.push(registerCard(card));
+    javaDeckCount = Number.isFinite(remainingDeckCount) ? remainingDeckCount : javaDeckCount;
+    renderHandAndDeck();
+  };
+
+  window.setInitialHand = function(cards, remainingDeckCount) {
+    handCards = Array.isArray(cards) ? cards.map(registerCard) : [];
+    javaDeckCount = Number.isFinite(remainingDeckCount) ? remainingDeckCount : javaDeckCount;
+    laneCards = Array.from({ length: 4 }, () => null);
+    renderBattlefield();
+    renderHandAndDeck();
+  };
+
+  window.setDeckCount = function(remainingDeckCount) {
+    javaDeckCount = Number.isFinite(remainingDeckCount) ? remainingDeckCount : javaDeckCount;
+    renderHandAndDeck();
+  };
+
+  function openCardModal(card) {
+    modalImage.src = card.imagePath;
+    modalImage.alt = card.name;
+    cardModal.classList.add("open");
+  }
+
+  function closeCardModal() {
+    cardModal.classList.remove("open");
+    modalImage.src = "";
+  }
+
+  function openClickedCard(event) {
+    if (suppressNextCardClick) {
+      suppressNextCardClick = false;
+      return;
+    }
+
+    const cardElement = event.target.closest(".card");
+    if (!cardElement) return;
+
+    const card = currentCards[Number(cardElement.dataset.cardIndex)];
+    if (card) {
+      openCardModal(card);
+    }
+  }
+
+  cardsButton.addEventListener("click", () => showView("cards"));
+  gameButton.addEventListener("click", () => showView("game"));
+  cardsGrid.addEventListener("click", openClickedCard);
+  handRow.addEventListener("click", openClickedCard);
+
+  battlefield.addEventListener("click", event => {
+    const floopButton = event.target.closest(".floop-button");
+    if (floopButton) {
+      event.stopPropagation();
+      const laneIndex = Number(floopButton.dataset.laneIndex);
+      const card = laneCards[laneIndex];
+      if (card && window.java && typeof window.java.floopCartaEnCarril === "function") {
+        window.java.floopCartaEnCarril(card.name, laneIndex);
+      }
+      return;
+    }
+
+    const cardElement = event.target.closest(".player-slot .card");
+    if (!cardElement) return;
+
+    const slot = cardElement.closest(".player-slot");
+    document.querySelectorAll(".player-slot.show-actions").forEach(openSlot => {
+      if (openSlot !== slot) openSlot.classList.remove("show-actions");
+    });
+    slot.classList.toggle("show-actions");
+  });
+
+  handRow.addEventListener("mousedown", event => {
+    if (event.button !== 0) return;
+
+    const cardElement = event.target.closest(".card");
+    if (!cardElement) return;
+
+    event.preventDefault();
+
+    activeDrag = {
+      cardElement,
+      cardIndex: Number(cardElement.dataset.cardIndex),
+      didDrag: false,
+      preview: null,
+      startX: event.clientX,
+      startY: event.clientY
+    };
+  });
+
+  document.addEventListener("mousemove", event => {
+    if (!activeDrag) return;
+
+    const movedX = Math.abs(event.clientX - activeDrag.startX);
+    const movedY = Math.abs(event.clientY - activeDrag.startY);
+    if (!activeDrag.didDrag && movedX + movedY < 8) {
+      return;
+    }
+
+    if (!activeDrag.preview) {
+      activeDrag.preview = activeDrag.cardElement.cloneNode(true);
+      activeDrag.preview.classList.add("drag-preview");
+      document.body.appendChild(activeDrag.preview);
+      activeDrag.cardElement.classList.add("dragging");
+    }
+
+    activeDrag.didDrag = true;
+    activeDrag.preview.style.left = `${event.clientX}px`;
+    activeDrag.preview.style.top = `${event.clientY}px`;
+
+    document.querySelectorAll(".player-slot.drag-over").forEach(slot => {
+      slot.classList.remove("drag-over");
+    });
+
+    const elementBelow = document.elementFromPoint(event.clientX, event.clientY);
+    const slot = elementBelow ? elementBelow.closest(".player-slot") : null;
+    if (slot) slot.classList.add("drag-over");
+  });
+
+  document.addEventListener("mouseup", event => {
+    if (!activeDrag) return;
+
+    const dragState = activeDrag;
+    activeDrag = null;
+
+    document.querySelectorAll(".player-slot.drag-over").forEach(slot => {
+      slot.classList.remove("drag-over");
+    });
+
+    dragState.cardElement.classList.remove("dragging");
+    if (dragState.preview) {
+      dragState.preview.remove();
+    }
+
+    if (!dragState.didDrag) return;
+
+    suppressNextCardClick = true;
+    setTimeout(() => {
+      suppressNextCardClick = false;
+    }, 0);
+
+    const elementBelow = document.elementFromPoint(event.clientX, event.clientY);
+    const slot = elementBelow ? elementBelow.closest(".player-slot") : null;
+    if (!slot) return;
+
+    placeCardInLane(dragState.cardIndex, Number(slot.dataset.laneIndex));
+  });
+
+  deckStack.addEventListener("click", () => {
+    if (window.java && typeof window.java.robarCarta === "function") {
+      window.java.robarCarta();
+    }
+  });
+
+  closeModalButton.addEventListener("click", closeCardModal);
+
+  cardModal.addEventListener("click", event => {
+    if (event.target === cardModal) {
+      closeCardModal();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeCardModal();
+    }
+  });
+</script>
+</body>
+</html>

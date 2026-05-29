@@ -1,0 +1,56 @@
+Pikachu;RAYO;120;140;55;50;75;60;Rayo;Ataque Rápido;Golpe de Acero;Descanso
+Bulbasaur;PLANTA:VENENO;90;160;55;65;80;85;Latigazo;Rayo Solar;Danza Venenosa;Nube Tóxica
+Charmander;FUEGO;115;150;60;55;85;70;Llamarada;Ataque Rápido;Draco Aliento;Gruñido
+Squirtle;AGUA;80;170;50;85;65;95;Pistola Agua;Ataque Rápido;Surf;Gruñido
+Snorlax;NORMAL;65;250;85;140;65;140;Placaje;Descanso;Afilar Garras;Doble Patada
+Jigglypuff;NORMAL;75;120;45;55;75;75;Gruñido;Descanso;Hipnosis;Placaje
+Vulpix;FUEGO;100;130;55;50;80;70;Llamarada;Ataque Rápido;Gruñido;Descanso
+Oddish;PLANTA:VENENO;85;140;55;70;80;85;Latigazo;Danza Venenosa;Rayo Solar;Placaje
+Gengar;FANTASMA:VENENO;135;200;70;70;120;80;Sombra Espectral;Rayo Hielo;Danza Venenosa;Gruñido
+Eevee;NORMAL;100;150;55;60;75;75;Ataque Rápido;Placaje;Descanso;Rayo
+Meowth;NORMAL;125;140;50;55;70;70;Ataque Rápido;Placaje;Gruñido;Descanso
+Poliwag;AGUA;95;140;50;60;70;70;Pistola Agua;Placaje;Gruñido;Descanso
+Magnemite;RAYO:ACERO;90;170;55;90;95;95;Rayo;Rayo Hielo;Gruñido;Ataque Rápido
+Dugtrio;TIERRA;140;150;70;55;85;65;Terremoto;Excavar;Tierra Viva;Gruñido
+Golem;ROCA:TIERRA;60;250;85;130;75;120;Terremoto;Tierra Viva;Excavar;Placaje
+Sandshrew;TIERRA;85;160;60;85;70;95;Excavar;Terremoto;Gruñido;Descanso
+Onix;ROCA:TIERRA;70;240;50;140;55;140;Golpe Cabeza;Terremoto;Placaje;Gruñido
+Rhyhorn;TIERRA:ROCA;65;230;75;120;65;110;Terremoto;Cornada;Excavar;Placaje
+Kabuto;ROCA:AGUA;95;160;65;85;80;85;Roca Afilada;Lanzarrocas;Triturar;Placaje
+Omanyte;ROCA:AGUA;90;170;65;90;80;90;Roca Afilada;Lanzarrocas;Triturar;Placaje
+Aerodactyl;ROCA:VOLADOR;155;200;85;70;95;75;Roca Afilada;Avalancha;Golpe Cabeza;Placaje
+Cranidos;ROCA;110;170;95;60;90;70;Roca Afilada;Triturar;Placaje;Defensa de Piedra
+Machop;LUCHA;95;170;75;70;80;70;Puño Feroz;Patada Voladora;Gruñido;Descanso
+Zubat;VENENO:VOLADOR;115;150;50;55;70;65;Ala Cortante;Huracán;Placaje;Gruñido
+Gastly;FANTASMA:VENENO;120;140;45;45;105;75;Sombra Espectral;Toque Fantasmal;Hipnosis;Placaje
+Dratini;DRAGON;95;180;65;65;85;75;Draco Aliento;Cola de Dragón;Placaje;Ataque Rápido
+Ekans;VENENO;85;150;60;60;75;75;Veneno Letal;Nube Tóxica;Placaje;Gruñido
+Abra;PSIQUICO;145;120;70;30;98;85;Confusión Mental;Psicocarga;Descanso;Hipnosis
+Caterpie;BICHO;60;100;35;45;60;60;Picadura;Doble Pincho;Placaje;Gruñido
+Umbreon;SINIESTRO;70;240;65;140;70;150;Maldición;Mordisco Oscuro;Placaje;Noche Sombría
+Pidgey;NORMAL:VOLADOR;120;130;50;55;70;65;Ala Cortante;Ataque Rápido;Placaje;Gruñido
+Haunter;FANTASMA:VENENO;130;180;65;60;115;80;Sombra Espectral;Toque Fantasmal;Confusión Mental;Placaje
+Steelix;ACERO:TIERRA;55;250;70;170;75;170;Golpe de Acero;Afilar Garras;Terremoto;Excavar
+Dragonite;DRAGON:VOLADOR;130;250;95;95;125;95;Draco Aliento;Cola de Dragón;Surf;Ataque Rápido
+Hitmonlee;LUCHA;135;200;90;75;80;70;Puño Feroz;Patada Voladora;Ataque Rápido;Gruñido
+Weezing;VENENO;75;220;65;140;85;140;Veneno Letal;Nube Tóxica;Rayo;Placaje
+Alakazam;PSIQUICO;155;170;90;55;135;85;Psicocarga;Confusión Mental;Hipnosis;Rayo
+Beedrill;BICHO:VENENO;130;160;75;60;85;75;Picadura;Doble Pincho;Ataque Rápido;Placaje
+Murkrow;SINIESTRO:VOLADOR;135;150;65;65;80;75;Maldición;Ala Cortante;Ataque Rápido;Mordisco Oscuro
+Snivy;PLANTA;140;140;45;60;80;75;Latigazo;Rayo Solar;Eco Helado;Golpe Bestial
+Tepig;FUEGO;105;160;60;70;85;75;Llamarada;Carga Voltio;Mordida Salvaje;Golpe Cabeza
+Oshawott;AGUA;100;160;55;70;80;80;Pistola Agua;Surf;Tierra Viva Plus;Ala Rápida
+Zorua;SINIESTRO;145;150;65;55;100;75;Mordisco Oscuro;Esfera Umbría;Confusión Mental;Golpe Lunar
+Zoroark;SINIESTRO;150;250;85;80;125;85;Pulso Oscuro;Tajo Sombrío;Esfera Umbría;Puño Sombra
+Excadrill;TIERRA:ACERO;130;250;95;95;90;95;Terremoto;Golpe de Acero;Ruptura Sísmica;Cuchilla Metálica
+Gigalith;ROCA;55;250;120;130;75;120;Roca Afilada;Avalancha;Meteoro Roto;Roca Explosiva
+Conkeldurr;LUCHA;85;230;105;95;85;75;Puño Feroz;Corte Cruzado;Patada Voladora;Golpe Bestial
+Hydreigon;SINIESTRO:DRAGON;130;250;95;85;130;95;Draco Aliento;Lanza Dragón;Pulso Oscuro;Tornado
+Chandelure;FANTASMA:FUEGO;80;220;90;80;130;85;Sombra Espectral;Beso Maldito;Llamarada;Confusión Mental
+Krookodile;TIERRA:SINIESTRO;120;230;95;95;110;85;Terremoto;Mordisco Oscuro;Pulso Oscuro;Ruptura Sísmica
+Haxorus;DRAGON;125;250;100;75;120;85;Cola de Dragón;Golpe Draco;Lanza Dragón;Ala Rápida
+Volcarona;BICHO:FUEGO;145;240;85;85;135;90;Llamarada;Ventisca;Golpe Lunar;Rayo Solar
+Galvantula;BICHO:RAYO;140;155;60;60;85;65;Plasma Eléctrico;Picadura;Carga Voltio;Eco Helado
+Ferrothorn;PLANTA:ACERO;50;250;95;150;90;150;Pincho Férreo;Latigazo;Cuchilla Metálica;Rayo Solar
+Reuniclus;PSIQUICO;65;220;85;75;130;90;Golpe Lunar;Fuerza Mental;Hipnosis;Confusión Mental
+Bisharp;SINIESTRO:ACERO;95;220;100;95;115;95;Tajo Sombrío;Cuchilla Metálica;Afilar Garras;Puño Sombra
