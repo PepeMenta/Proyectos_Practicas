@@ -1,10 +1,13 @@
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import javax.imageio.ImageIO;
 
 public class JuegoRPG {
     static Scanner sc = new Scanner (System.in);
@@ -221,7 +225,7 @@ public class JuegoRPG {
 
                     opcionTu = sc.nextLine().toUpperCase();
                     if (opcionTu.equals("C")) {
-                        auxTu = pokemonsTu.cambiarPokemon();
+                        auxTu = pokemonsTu.cambiarPokemon(false);
                     }
                 }while((((!opcionTu.equals("C") || auxTu == null) && !tu.movimientoDisponible(opcionTu)) && (!capturando) || (capturando && ((!opcionTu.equals("C") || auxTu == null) && !tu.movimientoDisponible(opcionTu) && !opcionTu.equals("H") && (!opcionTu.equals("L") || !pokemonsTu.tienePokeballs())))));
 
@@ -263,7 +267,7 @@ public class JuegoRPG {
                     sc.nextLine();
                     if (pokemonsTu.pokemonsDisponibles().size() != 0) {
                         tu.limpiarEstadoTemporalMovimiento();
-                        tu = pokemonsTu.cambiarPokemon();
+                        tu = pokemonsTu.cambiarPokemon(true);
                         add(pokemonsUsadosParaLv, tu);
                         movTu = null;
                         if (rival.vidaActual < rival.vida * 0.5 && random.nextDouble(0,1) < 0.33 && pokemonsRival.pokemonsDisponibles().size() > 1) {
@@ -292,7 +296,7 @@ public class JuegoRPG {
                             }while(!opcionTu.equals("C") && !opcionTu.equals("N"));
                             if (opcionTu.equals("C")) {
                                 tu.limpiarEstadoTemporalMovimiento();
-                                tu = pokemonsTu.cambiarPokemon();
+                                tu = pokemonsTu.cambiarPokemon(false);
                                 movTu = null;
                             }
                         }
@@ -471,11 +475,12 @@ public class JuegoRPG {
     static void mensajesMovimiento(Pokemon atacando, Pokemon atacado, Movimiento mov, Double critico) {
         if (atacando.estado.nombre.equals("DESAPARECER") && mov.turnosNecesarios == 2) System.out.println(atacando.nombre+" ha desaparecido del campo de batalla!");
         else if (atacando.estado.nombre.equals("CARGANDO") && mov.turnosNecesarios == 2) System.out.println(atacando.nombre+" esta cargando "+mov.nombre+"!");
-        else {
+        else if (mov.potencia > 0) {
             double efectividad;
             efectividad = atacado.calcularEfectividad(mov);
             if (efectividad == 2.0) System.out.println("Movimiento efectivo!");
             else if (efectividad == 0.5) System.out.println("Movimiento poco efectivo...");
+            else if (efectividad == 0.25) System.out.println("Movimiento muy poco efectivo...");
             else if (efectividad == 0) System.out.println(mov.nombre+" no afecta a "+atacado.nombre);
             else if (efectividad == 4) System.out.println("Movimiento hiperefectivo!!!");
             if (atacado.estado.equals(mov.estado) && !mov.estado.nombre.equals("NINGUNO")) System.out.println(mov.estado.nombre+" aplicada");
@@ -511,100 +516,195 @@ public class JuegoRPG {
 
     }
     static void imprimir_pokemons_datos (String url1, String url2, int tamaño) {
-        try {
-
-            ProcessBuilder pb = new ProcessBuilder(
-                "bash",
-                "-c",
-                "paste <(chafa -s "+tamaño+"x"+tamaño+" "+url1+") " + (url2 != null ? 
-                "<(chafa -s "+tamaño+"x"+tamaño+" "+url2+" | sed 's/^/"+" ".repeat(70)+"/')" : "")           
-            );
-            
-            pb.redirectErrorStream(true);
-
-            Process process = pb.start();
-
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream())
-            );
-
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            process.waitFor();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        imprimirImagenesPokemon(Arrays.asList(url1, url2), tamaño, 70);
     }
     static void imprimir_pokemons (Pokemon pok1, Pokemon pok2, int tamaño) {
-        try {
+        boolean desaparece1 = pok1.estado.nombre.equals("DESAPARECER");
+        boolean desaparece2 = pok2.estado.nombre.equals("DESAPARECER");
 
-            String comando;
-
-            boolean desaparece1 = pok1.estado.nombre.equals("DESAPARECER");
-            boolean desaparece2 = pok2.estado.nombre.equals("DESAPARECER");
-
-            int separacion = tamaño + 1; // 37 + espacios del paste
-
-            if (!desaparece1 && !desaparece2) {
-
-                comando =
-                    "paste -d '   ' " +
-                    "<(chafa -s "+tamaño+"x"+tamaño+" "+pok1.urlImagen()+") " +
-                    "<(chafa -s "+tamaño+"x"+tamaño+" "+pok2.urlImagen()+")";
-
-            } else if (desaparece1 && !desaparece2) {
-
-                comando =
-                    "chafa -s "+tamaño+"x"+tamaño+" "+pok2.urlImagen() +
-                    " | sed 's/^/"+" ".repeat(separacion)+"/'";
-
-            } else if (!desaparece1 && desaparece2) {
-
-                comando =
-                    "chafa -s "+tamaño+"x"+tamaño+" "+pok1.urlImagen();
-
-            } else {
-
-                comando = "echo ''";
-            }
-
-            ProcessBuilder pb = new ProcessBuilder(
-                "bash",
-                "-c",
-                comando
-            );
-
-            pb.redirectErrorStream(true);
-
-            Process process = pb.start();
-
-            BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream())
-            );
-
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            process.waitFor();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }    
+        imprimirImagenesPokemon(Arrays.asList(
+            desaparece1 ? null : pok1.urlImagen(),
+            desaparece2 ? null : pok2.urlImagen()
+        ), tamaño, 4);
     }
     static void clear() {
         try {
-            new ProcessBuilder("clear").inheritIO().start().waitFor();
+            if (esWindows()) {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+            } else {
+                new ProcessBuilder("clear").inheritIO().start().waitFor();
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
         }
+    }
+    static boolean esWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("win");
+    }
+    static void imprimirImagenesPokemon(List<String> urls, int tamaño, int espaciosEntreImagenes) {
+        ArrayList<List<String>> imagenes = new ArrayList<>();
+        int altoMaximo = 0;
+
+        for (String url : urls) {
+            List<String> imagen = renderizarImagenPokemon(url, tamaño);
+            imagenes.add(imagen);
+            altoMaximo = Math.max(altoMaximo, imagen.size());
+        }
+
+        String separacion = " ".repeat(espaciosEntreImagenes);
+        for (int fila = 0; fila < altoMaximo; fila++) {
+            StringBuilder linea = new StringBuilder();
+            for (int i = 0; i < imagenes.size(); i++) {
+                List<String> imagen = imagenes.get(i);
+                linea.append(fila < imagen.size() ? imagen.get(fila) : " ".repeat(tamaño));
+                if (i < imagenes.size() - 1) linea.append(separacion);
+            }
+            System.out.println(linea);
+        }
+    }
+    static List<String> renderizarImagenPokemon(String url, int tamaño) {
+        ArrayList<String> lineas = new ArrayList<>();
+
+        if (url == null) {
+            for (int i = 0; i < (tamaño + 1) / 2; i++) lineas.add(" ".repeat(tamaño));
+            return lineas;
+        }
+
+        try {
+            List<String> lineasChafa = renderizarConChafa(url, tamaño);
+            if (!lineasChafa.isEmpty()) return lineasChafa;
+
+            BufferedImage imagen = ImageIO.read(new File(url));
+            if (imagen == null) throw new IOException("No se pudo leer la imagen " + url);
+
+            Rectangle zonaVisible = zonaVisible(imagen);
+            int altoCaracteres = (tamaño + 1) / 2;
+            for (int y = 0; y < tamaño; y += 2) {
+                StringBuilder linea = new StringBuilder();
+                for (int x = 0; x < tamaño; x++) {
+                    Color arriba = colorPromedio(imagen, zonaVisible, x, y, tamaño);
+                    Color abajo = colorPromedio(imagen, zonaVisible, x, y + 1, tamaño);
+                    linea.append(pixelTerminal(arriba, abajo));
+                }
+                linea.append("\033[0m");
+                lineas.add(linea.toString());
+            }
+
+            while (lineas.size() < altoCaracteres) lineas.add(" ".repeat(tamaño));
+        } catch (IOException e) {
+            lineas.add("[Imagen no encontrada: " + url + "]");
+        }
+
+        return lineas;
+    }
+    static List<String> renderizarConChafa(String url, int tamaño) {
+        ArrayList<String> lineas = new ArrayList<>();
+
+        try {
+            ProcessBuilder pb = new ProcessBuilder("chafa", "-s", tamaño + "x" + tamaño, url);
+            pb.redirectErrorStream(true);
+
+            Process process = pb.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String linea;
+
+            while ((linea = reader.readLine()) != null) {
+                lineas.add(linea);
+            }
+
+            if (process.waitFor() == 0) return lineas;
+        } catch (Exception e) {
+            lineas.clear();
+        }
+
+        return lineas;
+    }
+    static Rectangle zonaVisible(BufferedImage imagen) {
+        int minX = imagen.getWidth();
+        int minY = imagen.getHeight();
+        int maxX = -1;
+        int maxY = -1;
+
+        for (int y = 0; y < imagen.getHeight(); y++) {
+            for (int x = 0; x < imagen.getWidth(); x++) {
+                int alpha = (imagen.getRGB(x, y) >>> 24) & 0xff;
+                if (alpha > 20) {
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x);
+                    maxY = Math.max(maxY, y);
+                }
+            }
+        }
+
+        if (maxX == -1) return new Rectangle(0, 0, imagen.getWidth(), imagen.getHeight());
+
+        int margen = 2;
+        minX = Math.max(0, minX - margen);
+        minY = Math.max(0, minY - margen);
+        maxX = Math.min(imagen.getWidth() - 1, maxX + margen);
+        maxY = Math.min(imagen.getHeight() - 1, maxY + margen);
+
+        return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
+    }
+    static Color colorPromedio(BufferedImage imagen, Rectangle zonaVisible, int x, int y, int tamaño) {
+        if (y >= tamaño) return null;
+
+        double escala = Math.min((double)tamaño / zonaVisible.width, (double)tamaño / zonaVisible.height);
+        int anchoDibujado = Math.max(1, (int)Math.round(zonaVisible.width * escala));
+        int altoDibujado = Math.max(1, (int)Math.round(zonaVisible.height * escala));
+        int offsetX = (tamaño - anchoDibujado) / 2;
+        int offsetY = (tamaño - altoDibujado) / 2;
+
+        if (x < offsetX || x >= offsetX + anchoDibujado || y < offsetY || y >= offsetY + altoDibujado) return null;
+
+        double srcX1 = zonaVisible.x + ((double)(x - offsetX) / anchoDibujado) * zonaVisible.width;
+        double srcY1 = zonaVisible.y + ((double)(y - offsetY) / altoDibujado) * zonaVisible.height;
+        double srcX2 = zonaVisible.x + ((double)(x - offsetX + 1) / anchoDibujado) * zonaVisible.width;
+        double srcY2 = zonaVisible.y + ((double)(y - offsetY + 1) / altoDibujado) * zonaVisible.height;
+
+        int inicioX = Math.max(zonaVisible.x, (int)Math.floor(srcX1));
+        int inicioY = Math.max(zonaVisible.y, (int)Math.floor(srcY1));
+        int finX = Math.min(zonaVisible.x + zonaVisible.width, (int)Math.ceil(srcX2));
+        int finY = Math.min(zonaVisible.y + zonaVisible.height, (int)Math.ceil(srcY2));
+
+        double rojo = 0;
+        double verde = 0;
+        double azul = 0;
+        double alphaTotal = 0;
+        int muestras = Math.max(1, (finX - inicioX) * (finY - inicioY));
+
+        for (int imgY = inicioY; imgY < finY; imgY++) {
+            for (int imgX = inicioX; imgX < finX; imgX++) {
+                Color color = new Color(imagen.getRGB(imgX, imgY), true);
+                int alpha = color.getAlpha();
+                rojo += color.getRed() * alpha;
+                verde += color.getGreen() * alpha;
+                azul += color.getBlue() * alpha;
+                alphaTotal += alpha;
+            }
+        }
+
+        if (alphaTotal / muestras < 18) return null;
+
+        return new Color(
+            (int)Math.round(rojo / alphaTotal),
+            (int)Math.round(verde / alphaTotal),
+            (int)Math.round(azul / alphaTotal)
+        );
+    }
+    static String pixelTerminal(Color arriba, Color abajo) {
+        if (arriba == null && abajo == null) return " ";
+        if (arriba == null) return colorTexto(abajo) + "▄";
+        if (abajo == null) return colorTexto(arriba) + "▀";
+        return colorTexto(arriba) + colorFondo(abajo) + "▀";
+    }
+    static String colorTexto(Color color) {
+        return "\033[38;2;" + color.getRed() + ";" + color.getGreen() + ";" + color.getBlue() + "m";
+    }
+    static String colorFondo(Color color) {
+        return "\033[48;2;" + color.getRed() + ";" + color.getGreen() + ";" + color.getBlue() + "m";
     }
     static Connection obtenerConexion() throws SQLException {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
@@ -1094,38 +1194,13 @@ public class JuegoRPG {
                     // IMÁGENES
                     // =========================
 
-                    String comandoImagenes = "paste ";
+                    ArrayList<String> urlsImagenes = new ArrayList<>();
 
                     for (int i = inicio; i < fin; i++) {
-
-                        comandoImagenes +=
-                            "<(chafa -s " + tamaño + "x" + tamaño + " "
-                            + pc.get(i).urlImagen() + ") ";
+                        urlsImagenes.add(pc.get(i).urlImagen());
                     }
 
-                    ArrayList<String> comando = new ArrayList<>();
-
-                    comando.add("bash");
-                    comando.add("-c");
-                    comando.add(comandoImagenes);
-
-                    ProcessBuilder pb = new ProcessBuilder(comando);
-
-                    pb.redirectErrorStream(true);
-
-                    Process process = pb.start();
-
-                    BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(process.getInputStream())
-                    );
-
-                    String line;
-
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println(line);
-                    }
-
-                    process.waitFor();
+                    imprimirImagenesPokemon(urlsImagenes, tamaño, 4);
 
                     // =========================
                     // NOMBRES
@@ -1360,7 +1435,7 @@ public class JuegoRPG {
 
             return capturado;
         }
-        public Pokemon cambiarPokemon () {
+        public Pokemon cambiarPokemon (boolean obligatorio) {
             String opcPokemonStr;
             int opcPokemon;
             Pokemon cambioPokemon = null;
@@ -1368,7 +1443,7 @@ public class JuegoRPG {
             mostrarPokemonsDisponibles();
             do{
                 opcPokemonStr=sc.nextLine().toUpperCase();
-            }while(!cambioPokemonCorrecto(opcPokemonStr) && !opcPokemonStr.equals("S"));
+            }while(!cambioPokemonCorrecto(opcPokemonStr) && (!opcPokemonStr.equals("S") || obligatorio));
             if (!opcPokemonStr.equals("S")) {
                 opcPokemon = Integer.parseInt(opcPokemonStr)-1;
                 
@@ -1654,33 +1729,7 @@ public class JuegoRPG {
             this.Naturaleza = naturalezas[random.nextInt(naturalezas.length)];
         }
         public void imprimirPokemon() {
-            try {
-
-                ProcessBuilder pb = new ProcessBuilder(
-                        "chafa",
-                        "-s", "46x46",
-                        urlImagen()
-                );
-
-                pb.redirectErrorStream(true);
-
-                Process process = pb.start();
-
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream())
-                );
-
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                }
-
-                process.waitFor();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }        
+            imprimirImagenesPokemon(Arrays.asList(urlImagen()), 46, 0);
         }
         public String urlImagen () {
             String url = "images/";
@@ -2314,7 +2363,7 @@ public class JuegoRPG {
                 mensajesModificacion(movimiento);
             }
 
-            if ((!movimiento.estadoAlEjecutador && rival) || (movimiento.estadoAlEjecutador && !rival)) {
+            if ((!movimiento.estadoAlEjecutador && rival && movimiento.potencia > 0 && daño == 0) || (movimiento.estadoAlEjecutador && !rival)) {
                 if (random.nextDouble(0,1) < movimiento.probEstado && !yaTieneEstado()) {
                     if (movimiento.estado.nombre.equals("QUEMADURA")) modificacionesStats.Atk = -2;
                     turnosEstado = movimiento.estado.maxTurnos;
